@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Listening</title>
+<meta name="description" content="A private reader for listening documents.">
+<meta name="theme-color" content="#E9EAE5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15191B" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+<script>
+  try { var t = JSON.parse(localStorage.getItem("theme")); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<header class="bar">
+  <button id="back" class="icon-btn" aria-label="Back to the list" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <h1 id="heading">Listening</h1>
+  <button id="theme" class="icon-btn" aria-label="Light or dark mode">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>
+  </button>
+  <button id="refresh" class="icon-btn" aria-label="Check for new documents">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<main id="library" class="wrap">
+  <section id="welcome" class="card" hidden>
+    <p id="welcome-text">Sign in with your Google account to load your listening documents. Only your account can open them.</p>
+    <button id="signin" class="button">Sign in with Google</button>
+  </section>
+  <ul id="docs" class="docs"></ul>
+  <p id="updated" class="muted small"></p>
+</main>
+
+<main id="reader" class="wrap" hidden>
+  <p id="mode-note" class="note" hidden></p>
+  <article id="text" class="text"></article>
+</main>
+
+<footer id="player" hidden>
+  <div class="seek">
+    <span id="cur" class="time">0:00</span>
+    <input id="slider" type="range" min="0" max="1" step="1" value="0" aria-label="Position">
+    <span id="left" class="time">0:00</span>
+  </div>
+  <div class="controls">
+    <button id="speed" class="pill" aria-label="Playback speed">1×</button>
+    <button id="rew" class="ctl" aria-label="Back 15 seconds">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5V2L7.5 5.5 12 9V6.5a6.5 6.5 0 1 1-6.5 6.5h-2A8.5 8.5 0 1 0 12 4.5z" fill="currentColor"/><text x="12" y="16.3" text-anchor="middle" font-size="6.6" font-weight="700" font-family="system-ui,sans-serif" fill="currentColor">15</text></svg>
+    </button>
+    <button id="play" class="ctl big" aria-label="Play">
+      <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+      <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z" fill="currentColor"/></svg>
+    </button>
+    <button id="fwd" class="ctl" aria-label="Forward 15 seconds">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5V2l4.5 3.5L12 9V6.5A6.5 6.5 0 1 0 18.5 13h2A8.5 8.5 0 1 1 12 4.5z" fill="currentColor"/><text x="12" y="16.3" text-anchor="middle" font-size="6.6" font-weight="700" font-family="system-ui,sans-serif" fill="currentColor">15</text></svg>
+    </button>
+    <button id="now" class="pill" aria-label="Show where it is reading">Now</button>
+  </div>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script src="https://accounts.google.com/gsi/client" async onload="window.onGsiLoad && window.onGsiLoad()"></script>
+</body>
+</html>
