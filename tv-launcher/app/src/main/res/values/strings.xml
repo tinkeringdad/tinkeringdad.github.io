@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Plain TV</string>
+    <string name="service_name">Plain TV remote buttons</string>
+    <string name="service_description">Sends your remote\'s Home button to Plain TV instead of the Google TV home screen, and the Assistant or microphone button to Plain search instead of Gemini. It only looks at those buttons and at which app is opening. It does not read the screen or anything you type.</string>
+    <string name="search_hint">Search apps, YouTube, and more</string>
+</resources>

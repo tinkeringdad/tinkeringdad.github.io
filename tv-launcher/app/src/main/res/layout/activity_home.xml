@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:clipChildren="false" android:clipToPadding="false"
+    android:paddingStart="56dp" android:paddingEnd="56dp" android:paddingTop="32dp">
+
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/search"
+            style="@style/Pill"
+            android:layout_width="0dp" android:layout_height="56dp" android:layout_weight="1"
+            android:background="@drawable/field"
+            android:textColor="@color/text"
+            android:textSize="20sp"
+            android:text="Search" 
+            android:drawablePadding="12dp"
+            android:nextFocusDown="@+id/grid" />
+
+        <TextView android:id="@+id/inputs" style="@style/Pill"
+            android:layout_width="wrap_content" android:layout_height="48dp"
+            android:layout_marginStart="16dp" android:text="Inputs"
+            android:textColor="@color/pill_text" android:nextFocusDown="@+id/grid" />
+
+        <TextView android:id="@+id/tvsettings" style="@style/Pill"
+            android:layout_width="wrap_content" android:layout_height="48dp"
+            android:layout_marginStart="12dp" android:text="TV settings"
+            android:textColor="@color/pill_text" android:nextFocusDown="@+id/grid" />
+
+        <TextView android:id="@+id/setup" style="@style/Pill"
+            android:layout_width="wrap_content" android:layout_height="48dp"
+            android:layout_marginStart="12dp" android:text="Plain TV"
+            android:textColor="@color/pill_text" android:nextFocusDown="@+id/grid" />
+
+        <TextClock
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:format12Hour="h:mm" android:format24Hour="HH:mm"
+            android:textSize="30sp" android:textColor="@color/text" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/hint"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="28dp" android:layout_marginBottom="8dp"
+        android:text="Apps" android:textSize="18sp" android:textColor="@color/muted" />
+
+    <GridView
+        android:id="@+id/grid"
+        android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:numColumns="5"
+        android:horizontalSpacing="20dp" android:verticalSpacing="20dp"
+        android:stretchMode="columnWidth"
+        android:listSelector="@android:color/transparent"
+        android:clipToPadding="false" android:clipChildren="false"
+        android:paddingTop="8dp" android:paddingBottom="40dp"
+        android:scrollbars="none"
+        android:nextFocusUp="@id/search" />
+</LinearLayout>
