@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Listening</title>
-<meta name="description" content="A private reader for listening documents.">
-<meta name="theme-color" content="#E9EAE5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#15191B" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Listen to your Google Docs.">
+<meta name="theme-color" content="#2E5A63">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -17,54 +16,124 @@
 </script>
 </head>
 <body>
-<header class="bar">
-  <button id="back" class="icon-btn" aria-label="Back to the list" hidden>
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-  <h1 id="heading">Listening</h1>
-  <button id="theme" class="icon-btn" aria-label="Light or dark mode">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>
-  </button>
-  <button id="refresh" class="icon-btn" aria-label="Check for new documents">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-</header>
 
-<main id="library" class="wrap">
-  <section id="welcome" class="card" hidden>
-    <p id="welcome-text">Sign in with your Google account to load your listening documents. Only your account can open them.</p>
-    <button id="signin" class="button">Sign in with Google</button>
-  </section>
-  <ul id="docs" class="docs"></ul>
-  <p id="updated" class="muted small"></p>
-</main>
+<!-- ============================== HOME ============================== -->
+<div id="home" class="screen">
+  <header class="brand">
+    <img src="icon.svg" alt="" width="40" height="40">
+    <h1>Listening</h1>
+  </header>
 
-<main id="reader" class="wrap" hidden>
-  <p id="mode-note" class="note" hidden></p>
-  <article id="text" class="text"></article>
-</main>
+  <main class="wrap">
+    <section id="signin-card" class="card" hidden>
+      <p>Sign in with your Google account to listen to your Google Docs. Only your account can use this reader.</p>
+      <button id="signin" class="button wide">Sign in with Google</button>
+    </section>
 
-<footer id="player" hidden>
-  <div class="seek">
-    <span id="cur" class="time">0:00</span>
-    <input id="slider" type="range" min="0" max="1" step="1" value="0" aria-label="Position">
-    <span id="left" class="time">0:00</span>
-  </div>
-  <div class="controls">
-    <button id="speed" class="pill" aria-label="Playback speed">1×</button>
-    <button id="rew" class="ctl" aria-label="Back 15 seconds">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5V2L7.5 5.5 12 9V6.5a6.5 6.5 0 1 1-6.5 6.5h-2A8.5 8.5 0 1 0 12 4.5z" fill="currentColor"/><text x="12" y="16.3" text-anchor="middle" font-size="6.6" font-weight="700" font-family="system-ui,sans-serif" fill="currentColor">15</text></svg>
+    <label for="link" class="label">Paste a Google Doc link</label>
+    <input id="link" class="input" type="url" inputmode="url" autocomplete="off"
+           placeholder="https://docs.google.com/document/d/…">
+    <button id="listen" class="button wide">Listen</button>
+
+    <h2 class="label">Voice</h2>
+    <p class="hint">Tap a voice to choose it. Tap ▶ to hear a short sample.</p>
+    <div class="voice-box" data-voices></div>
+
+    <h2 class="label">Free voice characters this month</h2>
+    <div class="meter"><i id="meter-fill"></i></div>
+    <p id="meter-text" class="hint"></p>
+
+    <h2 class="label">Recent</h2>
+    <ul id="recent" class="recent"></ul>
+    <p id="recent-empty" class="hint" hidden>Documents you open show up here.</p>
+
+    <p class="footer-note">
+      <button id="theme" class="linkish">Light / dark</button> ·
+      <button id="signout" class="linkish" hidden>Sign out</button>
+    </p>
+  </main>
+</div>
+
+<!-- ============================== READER ============================== -->
+<div id="reader" class="screen" hidden>
+  <header class="reader-head">
+    <button id="back" class="icon-btn" aria-label="Back">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5m6-6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <button id="play" class="ctl big" aria-label="Play">
-      <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
-      <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z" fill="currentColor"/></svg>
-    </button>
-    <button id="fwd" class="ctl" aria-label="Forward 15 seconds">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5V2l4.5 3.5L12 9V6.5A6.5 6.5 0 1 0 18.5 13h2A8.5 8.5 0 1 1 12 4.5z" fill="currentColor"/><text x="12" y="16.3" text-anchor="middle" font-size="6.6" font-weight="700" font-family="system-ui,sans-serif" fill="currentColor">15</text></svg>
-    </button>
-    <button id="now" class="pill" aria-label="Show where it is reading">Now</button>
-  </div>
-</footer>
+    <div class="titles">
+      <div id="doc-title" class="doc-title"></div>
+      <div id="ch-title" class="ch-title"></div>
+    </div>
+  </header>
+  <p class="voice-line">Voice: <span id="voice-name"></span> <button id="voice-change" class="linkish">Change</button></p>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="text" aria-selected="true">Text</button>
+    <button role="tab" data-tab="chapters">Chapters</button>
+    <button role="tab" data-tab="voice">Voice</button>
+    <button role="tab" data-tab="export">Export</button>
+  </nav>
+
+  <main class="wrap reader-body">
+    <section id="tab-text" class="tab">
+      <p id="status" class="status" hidden></p>
+      <article id="text" class="text"></article>
+    </section>
+
+    <section id="tab-chapters" class="tab" hidden>
+      <p class="hint">Each chapter is voiced when you get to it. The next one starts getting ready when you're 80% through the
+        current one, or 2 minutes from its end if that's sooner. Tap ↓ to save a chapter on this phone so it plays with no signal,
+        follow-along text included.</p>
+      <table class="chapters">
+        <thead><tr><th>Ch.</th><th>Chapter</th><th>Time</th>
+          <th><button id="save-all" class="round" aria-label="Save all chapters on this phone">↓</button></th></tr></thead>
+        <tbody id="chapter-rows"></tbody>
+      </table>
+      <p class="hint"><button id="reload-doc" class="linkish">Check the Google Doc for changes</button></p>
+    </section>
+
+    <section id="tab-voice" class="tab" hidden>
+      <p class="hint">Tap a voice to choose it. Tap ▶ to hear a short sample. The current chapter is re-voiced in the new voice.</p>
+      <div class="voice-box" data-voices></div>
+    </section>
+
+    <section id="tab-export" class="tab" hidden>
+      <div class="export">
+        <button id="export-chapter" class="button wide">Save this chapter as an MP3</button>
+        <button id="export-all" class="button wide secondary">Save every chapter as MP3 files</button>
+        <button id="copy-text" class="button wide secondary">Copy this chapter's text</button>
+        <button id="forget" class="button wide secondary">Remove from Recent</button>
+        <p class="hint">Saving every chapter voices any chapters not voiced yet, which uses free characters.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer id="player">
+    <div class="seek">
+      <span id="cur" class="time">0:00</span>
+      <input id="slider" type="range" min="0" max="1" step="1" value="0" aria-label="Position">
+      <span id="left" class="time">0:00</span>
+    </div>
+    <div class="controls">
+      <button id="speed" class="round" aria-label="Playback speed">1×</button>
+      <button id="rew" class="round skip" aria-label="Back 15 seconds">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.5 5 7.5l3 3M5.5 7.5H13a6 6 0 1 1-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>15</span>
+      </button>
+      <button id="play" class="play" aria-label="Play">
+        <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+        <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z" fill="currentColor"/></svg>
+        <span class="spinner" aria-hidden="true"></span>
+      </button>
+      <button id="fwd" class="round skip" aria-label="Forward 30 seconds">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 4.5 3 3-3 3M18.5 7.5H11a6 6 0 1 0 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>30</span>
+      </button>
+      <button id="sleep" class="round" aria-label="Sleep timer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span id="sleep-label"></span>
+      </button>
+    </div>
+  </footer>
+</div>
 
 <div id="toast" role="status" aria-live="polite"></div>
 

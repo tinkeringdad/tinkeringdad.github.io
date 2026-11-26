@@ -1,7 +1,7 @@
 // Keeps the reader itself working offline. Audio and text are cached by
 // app.js; this file only handles the page's own files, always trying the
 // network first so updates show up straight away.
-const SHELL = "listen-shell-v1";
+const SHELL = "listen-shell-v2";
 const FILES = ["./", "index.html", "app.js", "style.css", "config.js", "manifest.webmanifest",
   "icon.svg", "icon-192.png", "icon-512.png"];
 
