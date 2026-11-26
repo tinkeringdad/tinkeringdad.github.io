@@ -4,5 +4,5 @@ window.LISTEN_CONFIG = {
   // Google sign-in "Client ID" from Google Cloud (ends in .apps.googleusercontent.com)
   clientId: "",
   // Your private audio bucket: "<your-project-id>-listening"
-  bucket: "",
+  bucket: "my-dashboard-500103-listening",
 };
