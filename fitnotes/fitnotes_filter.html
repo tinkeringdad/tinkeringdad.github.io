@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitNotes Date Filter</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700;800;900&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111318;
+    --surface2: #181c23;
+    --border: #1f2530;
+    --accent: #e8ff47;
+    --accent2: #47c8ff;
+    --accent3: #ff6b47;
+    --text: #e8eaf0;
+    --text-dim: #6b7280;
+    --text-muted: #374151;
+    --success: #4ade80;
+    --warning: #fbbf24;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  header span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .panel-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+
+  /* ── Step 1: Date entry ── */
+  .dates-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .date-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 5px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--accent);
+    animation: tagIn 0.15s ease;
+  }
+
+  @keyframes tagIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .date-tag button {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.15s;
+  }
+  .date-tag button:hover { color: var(--accent3); }
+
+  .date-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  input[type="date"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    padding: 7px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    color-scheme: dark;
+  }
+  input[type="date"]:focus { border-color: var(--accent); }
+
+  .btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .btn-accent {
+    background: var(--accent);
+    color: #0a0c0f;
+  }
+  .btn-accent:hover:not(:disabled) { opacity: 0.88; }
+
+  .btn-ghost {
+    background: var(--surface2);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--text-dim); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--accent3);
+    border: 1px solid #3a1a12;
+  }
+  .btn-danger:hover:not(:disabled) { background: #1a0a07; }
+
+  /* ── Step 2: Upload ── */
+  #upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 4px;
+    padding: 18px 36px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  #upload-zone:hover, #upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(232,255,71,0.03);
+  }
+  #upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  #upload-zone .upload-icon {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+    opacity: 0.4;
+  }
+  #upload-zone p {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  #upload-zone small {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  #file-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--success);
+    margin-top: 8px;
+    min-height: 0;
+  }
+  #file-status:empty { margin-top: 0; }
+  .upload-panel { padding-bottom: 14px; }
+
+  /* ── Results ── */
+  #results-panel { display: none; }
+
+  .results-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .stat-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+  .stat-chip strong {
+    color: var(--accent);
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    max-height: 520px;
+    overflow-y: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+
+  thead th {
+    background: var(--surface2);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 10px 12px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  /* date-group divider row */
+  tbody tr.date-divider td {
+    background: #0d1015;
+    padding: 6px 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-top: 1px solid var(--border);
+  }
+
+  tbody td {
+    padding: 7px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  tbody td.col-date { color: var(--accent); font-size: 0.78rem; }
+  tbody td.col-exercise { color: var(--text); font-family: 'Barlow', sans-serif; font-weight: 400; white-space: normal; min-width: 160px; }
+  tbody td.col-category { color: var(--text-dim); font-size: 0.74rem; }
+  tbody td.col-comment { color: var(--text-dim); font-size: 0.74rem; font-family: 'Barlow', sans-serif; white-space: normal; min-width: 140px; max-width: 260px; }
+  tbody td.col-num { color: var(--accent2); }
+
+  .no-results {
+    text-align: center;
+    padding: 48px;
+    color: var(--text-muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  .hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  .step-num {
+    display: inline-block;
+    background: var(--accent);
+    color: #0a0c0f;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>FitNotes Filter</h1>
+    <span>DATE EXTRACTOR · CSV</span>
+  </header>
+
+  <!-- Step 1: Choose dates -->
+  <div class="panel">
+    <div class="panel-label"><span class="step-num">1</span> Choose Dates to Extract</div>
+
+    <div class="dates-row" id="tags-row">
+      <!-- date tags injected here -->
+      <span id="no-dates-hint" class="hint">No dates selected yet</span>
+    </div>
+
+    <div class="date-input-row">
+      <input type="date" id="date-picker" />
+      <button class="btn btn-accent" onclick="addDate()">+ Add</button>
+      <button class="btn btn-ghost" onclick="clearDates()">Clear All</button>
+    </div>
+    <p class="hint" style="margin-top:12px;">Add as many dates as you need, then upload the CSV below.</p>
+  </div>
+
+  <!-- Step 2: Upload -->
+  <div class="panel upload-panel">
+    <div class="panel-label"><span class="step-num">2</span> Upload FitNotes CSV</div>
+    <div id="upload-zone"
+         ondragover="event.preventDefault(); this.classList.add('drag-over')"
+         ondragleave="this.classList.remove('drag-over')"
+         ondrop="handleDrop(event)">
+      <input type="file" accept=".csv" onchange="handleFile(this.files[0])" />
+      <div class="upload-icon">⬆</div>
+      <p>Drop CSV here or click to browse</p>
+      <small>FitNotes_Export_*.csv</small>
+    </div>
+    <div id="file-status"></div>
+  </div>
+
+  <!-- Results -->
+  <div class="panel" id="results-panel">
+    <div class="panel-label">Filtered Results</div>
+    <div class="results-meta" id="results-meta"></div>
+    <div class="table-wrap" id="table-wrap"></div>
+  </div>
+
+</div>
+
+<script>
+  const COLS = ['Date','Exercise','Category','Weight','Weight Unit','Reps','Distance','Distance Unit','Time','Comment'];
+  let selectedDates = new Set();
+  let parsedRows = [];   // all CSV rows as objects
+  let filteredRows = []; // rows matching selected dates
+
+  /* ── Date Management ── */
+  function addDate() {
+    const picker = document.getElementById('date-picker');
+    const val = picker.value; // YYYY-MM-DD
+    if (!val) return;
+    if (selectedDates.has(val)) { picker.value = ''; return; }
+    selectedDates.add(val);
+    picker.value = '';
+    renderTags();
+    if (parsedRows.length) runFilter();
+  }
+
+  // allow Enter key on date picker
+  document.getElementById('date-picker').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addDate();
+  });
+
+  // preload today's date into the picker on page load (local time, not UTC)
+  (function preloadToday() {
+    const now = new Date();
+    const today = now.getFullYear() + '-' +
+      String(now.getMonth() + 1).padStart(2, '0') + '-' +
+      String(now.getDate()).padStart(2, '0');
+    document.getElementById('date-picker').value = today;
+  })();
+
+  function removeDate(val) {
+    selectedDates.delete(val);
+    renderTags();
+    if (parsedRows.length) runFilter();
+  }
+
+  function clearDates() {
+    selectedDates.clear();
+    renderTags();
+    if (parsedRows.length) runFilter();
+  }
+
+  function renderTags() {
+    const row = document.getElementById('tags-row');
+    const hint = document.getElementById('no-dates-hint');
+    // remove existing tags
+    row.querySelectorAll('.date-tag').forEach(t => t.remove());
+    if (selectedDates.size === 0) {
+      hint.style.display = '';
+    } else {
+      hint.style.display = 'none';
+      // sort dates chronologically
+      [...selectedDates].sort().forEach(d => {
+        const tag = document.createElement('div');
+        tag.className = 'date-tag';
+        tag.innerHTML = `${d}<button onclick="removeDate('${d}')" title="Remove">×</button>`;
+        row.insertBefore(tag, hint);
+      });
+    }
+  }
+
+  /* ── File Handling ── */
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  }
+
+  async function handleFile(file) {
+    if (!file || !file.name.endsWith('.csv')) {
+      document.getElementById('file-status').textContent = 'Please upload a .csv file';
+      return;
+    }
+    const status = document.getElementById('file-status');
+
+    // Show file.size immediately — 0 here means the export itself is empty (FitNotes issue, not tool issue)
+    if (file.size === 0) {
+      status.innerHTML =
+        `<span style="color:var(--accent3)">` +
+        `${file.name} is 0 bytes on disk</span><br>` +
+        `<span style="color:var(--text-muted);font-size:0.7rem">` +
+        `FitNotes may not have finished writing the export. ` +
+        `Wait a moment, re-export, then try again.</span>`;
+      return;
+    }
+
+    status.innerHTML =
+      `Loading ${file.name} ` +
+      `<span style="color:var(--text-dim)">(${file.size} bytes)</span>...`;
+
+    let raw = '';
+
+    // 1) Modern Promise API — better Android content:// URI support than FileReader
+    if (typeof file.text === 'function') {
+      try { raw = await file.text(); } catch (_) { raw = ''; }
+    }
+
+    // 2) FileReader fallback
+    if (!raw) {
+      raw = await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result || '');
+        reader.onerror = () => resolve('');
+        reader.readAsText(file);
+      });
+    }
+
+    // 3) ArrayBuffer + TextDecoder — last resort for stubborn Android URIs
+    if (!raw && file.size > 0) {
+      try {
+        const buf = await file.arrayBuffer();
+        raw = new TextDecoder('utf-8').decode(buf);
+      } catch (_) { raw = ''; }
+    }
+
+    const lineEnding = raw.includes('\r\n') ? '\\r\\n'
+                     : raw.includes('\r')   ? '\\r only'
+                     : '\\n';
+    parseCSV(raw);
+
+    if (parsedRows.length === 0) {
+      status.innerHTML =
+        `<span style="color:var(--accent3)">` +
+        `${file.name} — 0 rows parsed</span><br>` +
+        `<span style="color:var(--text-muted);font-size:0.7rem">` +
+        `file size: ${file.size}B · chars read: ${raw.length} · endings: ${lineEnding}<br>` +
+        `first 120 chars: ${escapeHtml(raw.slice(0, 120))}</span>`;
+    } else {
+      status.innerHTML =
+        `<span style="color:var(--success)">` +
+        `${file.name}</span> ` +
+        `<span style="color:var(--text-dim)">` +
+        `${parsedRows.length} rows · ${file.size}B · endings: ${lineEnding}</span>`;
+    }
+    runFilter();
+  }
+
+  function parseCSV(text) {
+    // Strip UTF-8 BOM if present
+    const clean = text.replace(/^\uFEFF/, '');
+    // Split on all three line-ending styles: \r\n, bare \r, bare \n
+    const lines = clean.split(/\r\n|\r|\n/).filter(l => l.trim());
+    parsedRows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const fields = parseCSVLine(lines[i]);
+      if (fields.length < 1) continue;
+      const obj = {};
+      COLS.forEach((col, idx) => obj[col] = (fields[idx] ?? '').trim());
+      parsedRows.push(obj);
+    }
+  }
+
+  // RFC 4180-compliant CSV line parser
+  function parseCSVLine(line) {
+    const result = [];
+    let cur = '', inQuote = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuote) {
+        if (ch === '"' && line[i+1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') inQuote = false;
+        else cur += ch;
+      } else {
+        if (ch === '"') inQuote = true;
+        else if (ch === ',') { result.push(cur); cur = ''; }
+        else cur += ch;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  /* ── Filter & Render ── */
+  function runFilter() {
+    const panel = document.getElementById('results-panel');
+    const meta = document.getElementById('results-meta');
+    const wrap = document.getElementById('table-wrap');
+
+    if (selectedDates.size === 0 || parsedRows.length === 0) {
+      panel.style.display = 'none';
+      return;
+    }
+
+    filteredRows = parsedRows.filter(r => selectedDates.has(r['Date']));
+    panel.style.display = 'block';
+
+    // meta stats
+    const matchedDates = [...new Set(filteredRows.map(r => r['Date']))].sort();
+    meta.innerHTML = `
+      <div class="stat-chip"><strong>${filteredRows.length}</strong><br>rows</div>
+      <div class="stat-chip"><strong>${matchedDates.length}</strong><br>dates matched</div>
+      <div class="stat-chip"><strong>${parsedRows.length}</strong><br>total in file</div>
+      <div class="action-row">
+        <button class="btn btn-accent" onclick="downloadCSV()">↓ Download CSV</button>
+        <button class="btn btn-ghost" onclick="copyCSV()">Copy CSV</button>
+      </div>
+    `;
+
+    if (filteredRows.length === 0) {
+      wrap.innerHTML = `<div class="no-results">No rows found for selected dates</div>`;
+      return;
+    }
+
+    // Build table grouped by date
+    let html = '<table><thead><tr>';
+    COLS.forEach(c => { html += `<th>${c}</th>`; });
+    html += '</tr></thead><tbody>';
+
+    let lastDate = null;
+    filteredRows.forEach(row => {
+      if (row['Date'] !== lastDate) {
+        html += `<tr class="date-divider"><td colspan="${COLS.length}">⬥ ${row['Date']}</td></tr>`;
+        lastDate = row['Date'];
+      }
+      html += '<tr>';
+      COLS.forEach(col => {
+        let cls = '';
+        if (col === 'Date') cls = 'col-date';
+        else if (col === 'Exercise') cls = 'col-exercise';
+        else if (col === 'Category') cls = 'col-category';
+        else if (col === 'Comment') cls = 'col-comment';
+        else if (['Weight','Reps','Distance','Time'].includes(col)) cls = 'col-num';
+        html += `<td class="${cls}">${escapeHtml(row[col])}</td>`;
+      });
+      html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  }
+
+  /* ── Export ── */
+  function buildCSVString() {
+    const header = COLS.join(',');
+    const rows = filteredRows.map(row =>
+      COLS.map(col => {
+        const v = row[col] ?? '';
+        return v.includes(',') || v.includes('"') || v.includes('\n')
+          ? `"${v.replace(/"/g, '""')}"` : v;
+      }).join(',')
+    );
+    return [header, ...rows].join('\r\n');
+  }
+
+  function downloadCSV() {
+    const csv = buildCSVString();
+    const dates = [...selectedDates].sort().join('_');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `FitNotes_${dates}.csv`;
+    a.click();
+  }
+
+  function copyCSV() {
+    navigator.clipboard.writeText(buildCSVString()).then(() => {
+      const btn = document.querySelector('.action-row .btn-ghost');
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = orig, 1800);
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
