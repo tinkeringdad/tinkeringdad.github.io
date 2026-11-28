@@ -171,7 +171,7 @@
 
   // ------------------------------------------------------------ result card
   let lastCSV = "";
-  function showResult(day, header, rows, link) {
+  function showResult(day, header, rows, link, folderId) {
     const col = (n) => header.indexOf(n);
     const iEx = col("Exercise"), iW = col("Weight"), iWU = col("Weight Unit"), iR = col("Reps"),
       iD = col("Distance"), iDU = col("Distance Unit"), iT = col("Time"), iC = col("Comment");
@@ -204,6 +204,7 @@
       return d;
     }));
     $("#open").href = link || "https://drive.google.com/";
+    $("#folder").href = `https://drive.google.com/drive/folders/${folderId}`;
     $("#result").hidden = false;
   }
 
@@ -249,7 +250,7 @@
       }
       if (old.length) log(`Moved ${old.length} older export(s) to Drive's trash (kept newest ${KEEP_EXPORTS})`, "ok");
 
-      showResult(day, header, dayRows, latest.webViewLink);
+      showResult(day, header, dayRows, latest.webViewLink, folderId);
       goBtn.textContent = "Run again";
     } catch (e) {
       log(e.message || String(e), "err");
@@ -258,11 +259,6 @@
     }
   });
 
-  $("#copy").addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(lastCSV); $("#copy").textContent = "Copied ✓"; }
-    catch { $("#copy").textContent = "Copy failed"; }
-    setTimeout(() => ($("#copy").textContent = "Copy CSV"), 1800);
-  });
 
   $("#theme").addEventListener("click", () => {
     const dark = document.documentElement.dataset.theme === "dark" ||

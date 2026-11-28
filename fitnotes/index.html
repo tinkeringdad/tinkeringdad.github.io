@@ -69,7 +69,7 @@
   .ex .note { font-size: .9rem; font-style: italic; margin-top: .15rem; }
   .row { display: flex; gap: .5rem; margin-top: 1rem; flex-wrap: wrap; }
   .btn {
-    flex: 1 1 auto; border: 1px solid var(--rule); background: transparent; color: var(--ink);
+    flex: 1 1 0; border: 1px solid var(--rule); background: transparent; color: var(--ink);
     border-radius: 10px; padding: .7rem 1rem; font: 500 .95rem var(--sans); cursor: pointer;
     text-align: center; text-decoration: none;
   }
@@ -97,8 +97,8 @@
     </div>
     <div id="r-list"></div>
     <div class="row">
-      <button id="copy" class="btn">Copy CSV</button>
       <a id="open" class="btn" target="_blank" rel="noopener">Open in Drive</a>
+      <a id="folder" class="btn" target="_blank" rel="noopener">Open Drive folder</a>
     </div>
   </section>
 
