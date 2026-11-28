@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Latest Workout</title>
+<meta name="description" content="Strips the newest FitNotes export in Google Drive down to the latest workout day.">
+<meta name="theme-color" content="#E9EAE5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15191B" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root {
+    --paper: #E9EAE5; --sheet: #F3F4F0; --ink: #20262A; --muted: #5A6368;
+    --rule: #C3C7C1; --accent: #2E5A63; --on-accent: #FFFFFF;
+    --good: #2F6B3A; --warn: #8A5A00; --bad: #A33A2B;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15191B; --sheet: #1D2326; --ink: #E2E5E0; --muted: #9AA4A9;
+      --rule: #343D41; --accent: #8EC3CC; --on-accent: #10181A;
+      --good: #8FD19A; --warn: #E8C170; --bad: #F09A8C; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15191B; --sheet: #1D2326; --ink: #E2E5E0; --muted: #9AA4A9;
+    --rule: #343D41; --accent: #8EC3CC; --on-accent: #10181A;
+    --good: #8FD19A; --warn: #E8C170; --bad: #F09A8C; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: 1rem; line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  [hidden] { display: none !important; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: calc(1.25rem + env(safe-area-inset-top)) 16px 3rem; }
+  h1 { font-size: 1.5rem; margin: 0 0 .25rem; letter-spacing: -.01em; }
+  .sub { color: var(--muted); margin: 0 0 1.5rem; font-size: .95rem; }
+  .go {
+    display: block; width: 100%; border: 0; border-radius: 14px; cursor: pointer;
+    background: var(--accent); color: var(--on-accent);
+    font: 600 1.2rem/1 var(--sans); padding: 1.25rem 1rem;
+  }
+  .go:disabled { opacity: .55; cursor: default; }
+  .log { list-style: none; padding: 0; margin: 1.25rem 0 0; font-size: .95rem; }
+  .log li { padding: .3rem 0; display: flex; gap: .6rem; }
+  .log li::before { content: "•"; color: var(--muted); }
+  .log li.ok::before { content: "✓"; color: var(--good); }
+  .log li.warn { color: var(--warn); } .log li.warn::before { content: "!"; color: var(--warn); }
+  .log li.err { color: var(--bad); }  .log li.err::before { content: "✗"; color: var(--bad); }
+  .card {
+    background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px;
+    padding: 1rem; margin-top: 1.25rem;
+  }
+  .stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: .75rem; }
+  .stats b { display: block; font-size: 1.35rem; }
+  .stats span { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+  .ex { border-top: 1px solid var(--rule); padding: .6rem 0; }
+  .ex:first-of-type { border-top: 0; }
+  .ex .name { font-weight: 600; }
+  .ex .sets { font-family: var(--mono); font-size: .85rem; color: var(--muted); overflow-wrap: anywhere; }
+  .ex .note { font-size: .9rem; font-style: italic; margin-top: .15rem; }
+  .row { display: flex; gap: .5rem; margin-top: 1rem; flex-wrap: wrap; }
+  .btn {
+    flex: 1 1 auto; border: 1px solid var(--rule); background: transparent; color: var(--ink);
+    border-radius: 10px; padding: .7rem 1rem; font: 500 .95rem var(--sans); cursor: pointer;
+    text-align: center; text-decoration: none;
+  }
+  .muted { color: var(--muted); } .small { font-size: .85rem; }
+  footer { margin-top: 2rem; }
+  footer button { background: none; border: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; padding: 0; }
+</style>
+<script>
+  try { var t = JSON.parse(localStorage.getItem("theme")); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>Latest Workout</h1>
+  <p class="sub">Reads the newest FitNotes export in your Drive folder <b>FitNotes Daily</b>, keeps only the latest workout day, and saves it there as <b>FitNotes_Latest.csv</b>.</p>
+
+  <button id="go" class="go">Get latest workout</button>
+  <ul id="log" class="log"></ul>
+
+  <section id="result" class="card" hidden>
+    <div class="stats">
+      <div><b id="r-date"></b><span>Workout day</span></div>
+      <div><b id="r-sets"></b><span>Sets</span></div>
+      <div><b id="r-ex"></b><span>Exercises</span></div>
+    </div>
+    <div id="r-list"></div>
+    <div class="row">
+      <button id="copy" class="btn">Copy CSV</button>
+      <a id="open" class="btn" target="_blank" rel="noopener">Open in Drive</a>
+    </div>
+  </section>
+
+  <footer class="small muted">
+    <p>Daily routine: export from FitNotes → share to Google Drive → <b>FitNotes Daily</b> folder → tap the button above.
+    Older full exports are moved to Drive's trash, keeping the newest 3.</p>
+    <p><button id="theme">Light / dark</button> · <button id="signout">Sign out</button></p>
+  </footer>
+</main>
+
+<script src="app.js"></script>
+<script src="https://accounts.google.com/gsi/client" async onload="onGsiLoad()"></script>
+</body>
+</html>
