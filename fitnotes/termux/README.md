@@ -24,7 +24,7 @@ Needs **Termux** and **Termux:Widget**, both from F-Droid.
 1. Open **Termux**. Paste this line and press Enter:
 
    ```
-   curl -fsSL https://raw.githubusercontent.com/tinkeringdad/tinkeringdad.github.io/claude/fitnotes-daily-export-filter-10jzlf/fitnotes/termux/setup.sh | bash
+   curl -fsSL https://tinkeringdad.github.io/fitnotes/termux/setup.sh | bash
    ```
 
 2. Answer the prompts:

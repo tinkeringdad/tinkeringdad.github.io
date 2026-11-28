@@ -3,7 +3,7 @@
 # Safe to run again; it skips anything already done.
 
 set -e
-BASE="https://raw.githubusercontent.com/tinkeringdad/tinkeringdad.github.io/claude/fitnotes-daily-export-filter-10jzlf/fitnotes/termux"
+BASE="https://tinkeringdad.github.io/fitnotes/termux"
 FOLDER="/storage/emulated/0/Download/_Fitnotes Filter"
 SHORTCUT="$HOME/.shortcuts/Latest Workout"
 
